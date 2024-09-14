@@ -69,7 +69,7 @@ class DataProcessor:
 
   def _get_examples(self, dataset, dataset_type="train"):
     examples = []
-    ids_sent, segs_sent = [], []
+    ids_sent, segs_sent, sentences1, sentences2, labels = [], [], [], [], []
     max_length = 0
     for row in tqdm(dataset, desc="tokenizing..."):
       _, sentence1, sentence2, label = row
@@ -80,10 +80,13 @@ class DataProcessor:
       ids_sent1 = self.tokenizer.encode(sentence1, sentence2)
       segs_sent1 = [0] * sentence1_length + [1] * (sentence2_length)
 
-      assert len(ids_sent1) == len(segs_sent1)
+      assert len(ids_sent1) == len(segs_sent1), f"different lengths for ids_sent1 and segs_sent1: {len(ids_sent1)}, {len(segs_sent1)}"
 
       ids_sent.append(ids_sent1)
       segs_sent.append(segs_sent1)
+      sentences1.append(sentence1)
+      sentences2.append(sentence2)
+      labels.append(label)
 
       if max_length < len(ids_sent1):
         max_length = len(ids_sent1)
@@ -92,7 +95,7 @@ class DataProcessor:
     print(f"Maximum length of sequence: {max_length}")
     self.max_sent_len = max_length
 
-    for ids_sent1, segs_sent1 in zip(ids_sent, segs_sent):
+    for ids_sent1, segs_sent1, sentence1, sentence2, label in zip(ids_sent, segs_sent, sentences1, sentences2, labels):
       if len(ids_sent1) <= self.max_sent_len:        
         res = self.max_sent_len - len(ids_sent1)
         att_mask_sent1 = [1] * len(ids_sent1) + [0] * res
@@ -178,7 +181,7 @@ class StudentEssayProcessor(DataProcessor):
           l = [1,0]
         else:
           l = [0,1]
-              
+
         if split == "train":
           result_train.append([sample_id, sent, target, l])
         elif split == "dev":

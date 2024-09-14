@@ -82,8 +82,9 @@ def run():
       col_fn = collate_fn_graph
     train_dataloader = DataLoader(train_set, batch_size=config["batch_size"], shuffle=True, collate_fn=col_fn)
   else:
+    col_fn = collate_fn
     sampler_train = BalancedSampler(data_train, train_adv, config["batch_size"])
-    train_dataloader = DataLoader(train_set, batch_sampler=sampler_train, collate_fn=collate_fn)
+    train_dataloader = DataLoader(train_set, batch_sampler=sampler_train, collate_fn=col_fn)
 
     model = AdversarialNet(config)
 
@@ -96,8 +97,8 @@ def run():
 
   model.to(device)
 
-  dev_dataloader = DataLoader(dev_set, batch_size=config["batch_size"], shuffle=True, collate_fn=collate_fn)
-  test_dataloader = DataLoader(test_set, batch_size=config["batch_size"], shuffle=True, collate_fn=collate_fn)
+  dev_dataloader = DataLoader(dev_set, batch_size=config["batch_size"], shuffle=True, collate_fn=col_fn)
+  test_dataloader = DataLoader(test_set, batch_size=config["batch_size"], shuffle=True, collate_fn=col_fn)
 
   no_decay = ["bias", "LayerNorm.weight"]
   optimizer_grouped_parameters = [

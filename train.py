@@ -30,7 +30,6 @@ class Trainer:
             else:
                 ids_sent1, segs_sent1, att_mask_sent1, labels = batch
 
-
             if self.config["adversarial"]:
                 pred, pred_adv, task_pred = model(ids_sent1, segs_sent1, att_mask_sent1)
                 try:
@@ -76,7 +75,7 @@ class Trainer:
         val_loss = 0
         val_preds = []
         val_labels = []
-        for batch in val_loader:
+        for batch in tqdm(val_loader, desc="Validating..."):
             batch = tuple(t.to(self.device) if not isinstance(t, list) else t for t in batch)
             if not self.config["adversarial"] and self.config["use_graph"]:
                 ids_sent1, segs_sent1, att_mask_sent1, sentence1, sentence2, labels = batch
